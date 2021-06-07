@@ -14,7 +14,7 @@ function checksExistsUserAccount(request, response, next) {
   const user = users.find((u) => u.username === username);
   if (!user) {
     return response.status(404).json({
-      message: 'User not found!',
+      error: 'User not found!',
     });
   }
 
@@ -26,13 +26,13 @@ function checksCreateTodosUserAvailability(request, response, next) {
   const { user } = request;
   if (!user) {
     return response.status(404).json({
-      message: 'User not found',
+      error: 'User not found',
     });
   }
 
   if (user.pro === false && user.todos.length === 10) {
     return response.status(403).json({
-      message: 'Limited value of todos reached, become a pro user',
+      error: 'Limited value of todos reached, become a pro user',
     });
   }
 
@@ -52,20 +52,20 @@ function checksTodoExists(request, response, next) {
   const user = users.find((u) => u.username === username);
   if (!user) {
     return response.status(404).json({
-      message: 'User not found',
+      error: 'User not found',
     });
   }
 
   if (!validate(id)) {
     return response.status(400).json({
-      message: 'Invalid TODO id',
+      error: 'Invalid TODO id',
     });
   }
 
   const todo = user.todos.find((t) => t.id === id);
   if (!todo) {
     return response.status(404).json({
-      message: 'TODO not found',
+      error: 'TODO not found',
     });
   }
 
@@ -84,7 +84,7 @@ function findUserById(request, response, next) {
   }
 
   return response.status(404).json({
-    message: 'User not found',
+    error: 'User not found',
   });
 }
 
