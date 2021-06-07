@@ -10,19 +10,82 @@ app.use(cors());
 const users = [];
 
 function checksExistsUserAccount(request, response, next) {
-  // Complete aqui
+  const { username } = request.headers;
+  const user = users.find((u) => u.username === username);
+  if (!user) {
+    return response.status(404).json({
+      message: 'User not found!',
+    });
+  }
+
+  request.user = user;
+  return next();
 }
 
 function checksCreateTodosUserAvailability(request, response, next) {
-  // Complete aqui
+  const { user } = request;
+  if (!user) {
+    return response.status(404).json({
+      message: 'User not found',
+    });
+  }
+
+  if (user.pro === false && user.todos.length === 10) {
+    return response.status(403).json({
+      message: 'Limited value of todos reached, become a pro user',
+    });
+  }
+
+  return next();
 }
 
 function checksTodoExists(request, response, next) {
-  // Complete aqui
+  const {
+    headers: {
+      username,
+    },
+    params: {
+      id,
+    },
+  } = request;
+
+  const user = users.find((u) => u.username === username);
+  if (!user) {
+    return response.status(404).json({
+      message: 'User not found',
+    });
+  }
+
+  if (!validate(id)) {
+    return response.status(400).json({
+      message: 'Invalid TODO id',
+    });
+  }
+
+  const todo = user.todos.find((t) => t.id === id);
+  if (!todo) {
+    return response.status(404).json({
+      message: 'TODO not found',
+    });
+  }
+
+  request.user = user;
+  request.todo = todo;
+  return next();
 }
 
 function findUserById(request, response, next) {
-  // Complete aqui
+  const { id } = request.params;
+
+  const user = users.find((u) => u.id === id);
+  if (user) {
+    request.user = user;
+    return next();
+  }
+
+  return response.status(404).json({
+    message: 'User not found',
+  });
 }
 
 app.post('/users', (request, response) => {
@@ -39,7 +102,7 @@ app.post('/users', (request, response) => {
     name,
     username,
     pro: false,
-    todos: []
+    todos: [],
   };
 
   users.push(user);
@@ -80,7 +143,7 @@ app.post('/todos', checksExistsUserAccount, checksCreateTodosUserAvailability, (
     title,
     deadline: new Date(deadline),
     done: false,
-    created_at: new Date()
+    created_at: new Date(),
   };
 
   user.todos.push(newTodo);
@@ -126,5 +189,5 @@ module.exports = {
   checksExistsUserAccount,
   checksCreateTodosUserAvailability,
   checksTodoExists,
-  findUserById
+  findUserById,
 };
